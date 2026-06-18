@@ -27,13 +27,15 @@ export async function POST(req: NextRequest) {
   }
 
   const token = createSession();
+  const proto = req.headers.get("x-forwarded-proto");
+  const isSecure = proto === "https" || (!proto && process.env.NODE_ENV === "production");
   const res = NextResponse.json({ success: true, token });
   res.cookies.set(getSessionCookieName(), token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: isSecure,
     sameSite: "lax",
     path: "/",
-    maxAge: 24 * 60 * 60, // 24 hours
+    maxAge: 24 * 60 * 60,
   });
 
   return res;
